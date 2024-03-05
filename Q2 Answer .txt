@@ -1,0 +1,54 @@
+# 1. Write a SQL query to find the Average order value, total number of orders, first
+order date, last order date, first order value, last order value of a customer.
+
+
+SELECT
+    Customer_id,
+    AVG(`Placed GMV`) AS Average_Order_Value,
+    COUNT(DISTINCT `Order ID`) AS Total_Number_of_Orders,
+    MIN(`Order Date`) AS First_Order_Date,
+    MAX(`Order Date`) AS Last_Order_Date,
+    FIRST_VALUE(`Placed GMV`) AS First_Order_Value,
+    LAST_VALUE(`Placed GMV`) AS Last_Order_Value
+FROM
+    df
+GROUP BY
+    Customer_id;
+
+
+
+# 2 .From the given data, if we had to list the top 20 products in our Popular
+Products category, how would you pick the products and rank them?
+
+SELECT
+    `Product Name`,
+    SUM(`Units Sold`) AS Total_Units_Sold
+FROM
+    df
+GROUP BY
+    `Product Name`
+ORDER BY
+    Total_Units_Sold DESC
+LIMIT 20;
+
+
+# 3. Write a SQL query to find out the top 3 articles for each customer in terms of
+placed_gmv.
+
+WITH RankedArticles AS (
+    SELECT
+        Customer_id,
+        sku_id,
+        `Placed GMV`,
+        ROW_NUMBER() OVER (PARTITION BY Customer_id ORDER BY `Placed GMV` DESC) AS rn
+    FROM
+        df
+)
+SELECT
+    Customer_id,
+    sku_id,
+    `Placed GMV`
+FROM
+    RankedArticles
+WHERE
+    rn <= 3;
